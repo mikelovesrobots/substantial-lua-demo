@@ -2,7 +2,8 @@ require('map')
 require('lua-enumerable')
 
 function love.load()
-  reverse_direction = false
+  music = love.audio.newSource("theme.mp3")
+  love.audio.play(music)
 
   screen_width = map.width * map.tilewidth
   screen_height = map.height * map.tileheight
