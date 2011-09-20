@@ -12,11 +12,12 @@ function love.load()
 
   --world:setGravity(0, 700) --the x component of the gravity will be 0, and the y component of the gravity will be 700
   world:setMeter(64) --the height of a meter in this world will be 64px
+  world:setCallbacks(add, persist, rem, result)
 
   objects = {} -- table to hold all our physical objects
   --let's create a ball for each target
   objects.balls = table.collect(get_targets(), function(x) return spawn_ball(x) end)
-
+  table.each(objects.balls, function (ball,i) ball.shape:setData(i) end)
   --initial graphics setup
   -- love.graphics.setBackgroundColor(57, 57, 59) -- substantial gray
   love.graphics.setBackgroundColor(255, 255, 255)
@@ -66,31 +67,48 @@ end
 
 function move_balls(dt)
   table.each(objects.balls, function(ball)
-                              local diff_x = math.abs(ball.body:getX() - ball.target.x)
-                              local diff_y = math.abs(ball.body:getY() - ball.target.y)
-
-                              if diff_x < 2 and diff_y < 2 then
-                                ball.body:setPosition(ball.target.x, ball.target.y)
-                                ball.body:putToSleep()
+                              if ball.passive_dt > 0 then
+                                ball.passive_dt = ball.passive_dt - dt
                               else
-                                local x = 160
-                                local y = 160
-
-                                if ball.body:getX() > ball.target.x then
-                                  x = x * -1
-                                end
-
-                                if ball.body:getY() > ball.target.y then
-                                  y = y * -1
-                                end
-
-                                ball.body:setLinearVelocity(x, y)
+                                move_ball(ball)
                               end
                             end)
 end
 
-function math.clamp(low, n, high) return math.min(math.max(n, low), high) end
-function math.dist(x1,y1, x2,y2) return ((x2-x1)^2+(y2-y1)^2)^0.5 end
+function move_ball(ball)
+  local diff_x = math.abs(ball.body:getX() - ball.target.x)
+  local diff_y = math.abs(ball.body:getY() - ball.target.y)
+
+  if diff_x < 2 and diff_y < 2 then
+    ball.body:setPosition(ball.target.x, ball.target.y)
+    ball.body:putToSleep()
+  else
+    local x1 = ball.body:getX()
+    local y1 = ball.body:getY()
+    local x2 = ball.target.x
+    local y2 = ball.target.y
+
+    local angle = math.angle(x1,y1,x2,y2)
+    local dx, dy = math.calc_destination(x1, y1, angle, ball.speed)--225)
+    ball.body:setLinearVelocity(dx-x1, dy-y1)
+  end
+end
+
+function math.dist(x1,y1, x2,y2)
+  return ((x2-x1)^2+(y2-y1)^2)^0.5
+end
+
+function math.angle(x1, y1, x2, y2)
+  return math.atan2(y2-y1,x2-x1)
+end
+
+function math.clamp(low, n, high)
+  return math.min(math.max(n, low), high)
+end
+
+function math.calc_destination(x1, y1, angle, distance)
+  return x1 + (distance * math.cos(angle)), y1 + (distance * math.sin(angle))
+end
 
 function spawn_ball(target)
   local ball = {}
@@ -98,6 +116,20 @@ function spawn_ball(target)
   ball.body:setLinearDamping( 0.5 )
   ball.shape = love.physics.newCircleShape(ball.body, 0, 0, 4)
   ball.target = target
+  ball.speed = math.clamp(50, math.dist(ball.body:getX(), ball.body:getY(), target.x, target.y) / 2, 500)
+  ball.passive_dt = 0
   return ball
 end
 
+function add(a, b, coll) -- a colliding with b at an angle of coll:getNormal()
+  --objects.balls[b].passive_dt = 0.5
+end
+
+function persist(a, b, coll) -- a touching b
+end
+
+function rem(a, b, coll) -- a uncolliding with b
+end
+
+function result(a, b, coll) -- a hit b resulting with coll:getNormal()
+end
