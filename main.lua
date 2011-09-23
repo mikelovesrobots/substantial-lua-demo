@@ -14,14 +14,15 @@ function love.load()
   world:setMeter(64) --the height of a meter in this world will be 64px
   world:setCallbacks(add, persist, rem, result)
 
-  objects = {} -- table to hold all our physical objects
-  --let's create a ball for each target
-  objects.balls = table.collect(get_targets(), function(x) return spawn_ball(x) end)
-  table.each(objects.balls, function (ball,i) ball.shape:setData(i) end)
   --initial graphics setup
   -- love.graphics.setBackgroundColor(57, 57, 59) -- substantial gray
   love.graphics.setBackgroundColor(255, 255, 255)
   love.graphics.setMode(screen_width, screen_height, true, true, 4)
+
+  objects = {} -- table to hold all our physical objects
+  objects.balls = table.collect(get_targets(), function(x) return spawn_ball(x) end)
+  table.each(objects.balls, function (ball,i) ball.shape:setData(i) end)
+
 end
 
 function love.update(dt)
@@ -38,22 +39,15 @@ end
 function love.draw()
   love.graphics.setColor(249, 56, 29) --set the drawing color to red for the ball
   table.each(objects.balls, function(ball)
-                              love.graphics.circle("fill", ball.body:getX(), ball.body:getY(), ball.shape:getRadius(), 16)
+                              draw_ball(ball)
                             end)
+  if objects.ball then
+    draw_ball(objects.ball)
+  end
 end
 
-function get_targets()
-  local layer = map.layers[1]
-  local targets = {}
-  table.each(layer.data, function(p, i)
-                           if p == 2 then
-                             local target = {}
-                             target.x = (i % layer.width) * map.tilewidth
-                             target.y = (math.floor(i / layer.width)) * map.tileheight
-                             table.push(targets, target)
-                           end
-                         end)
-  return targets
+function draw_ball(ball)
+  love.graphics.circle("fill", ball.body:getX(), ball.body:getY(), ball.shape:getRadius(), 32)
 end
 
 function get_targets()
@@ -78,6 +72,11 @@ function move_balls(dt)
                                 move_ball(ball)
                               end
                             end)
+
+  if objects.ball then
+    objects.ball.target = {x=love.mouse.getX(), y=love.mouse.getY()}
+    move_ball(objects.ball)
+  end
 end
 
 function move_ball(ball)
@@ -95,7 +94,12 @@ function move_ball(ball)
 
     local angle = math.angle(x1,y1,x2,y2)
     local dx, dy = math.calc_destination(x1, y1, angle, ball.speed)--225)
-    ball.body:setLinearVelocity(dx-x1, dy-y1)
+
+    --if ball == objects.ball then
+    --  ball.body:applyForce(dx-x1, dy-y1)
+    --else
+      ball.body:setLinearVelocity(dx-x1, dy-y1)
+    --end
   end
 end
 
@@ -127,8 +131,25 @@ function spawn_ball(target)
   return ball
 end
 
+function spawn_mouseball()
+  local ball = {}
+  ball.body = love.physics.newBody(world, math.random(1,screen_width), math.random(1,screen_height), 50, 0)
+  ball.body:setLinearDamping( 0.1 )
+  ball.shape = love.physics.newCircleShape(ball.body, 0, 0, 16)
+  ball.shape:setRestitution(0.1)
+  ball.passive_dt = 0
+  ball.target = {x=0,y=0}
+  ball.speed = 300
+
+  return ball
+end
+
+function love.mousepressed(x, y, button)
+  objects.ball = spawn_mouseball()
+end
+
 function add(a, b, coll) -- a colliding with b at an angle of coll:getNormal()
-  --objects.balls[b].passive_dt = 0.5
+  -- objects.balls[b].passive_dt = 0.1
 end
 
 function persist(a, b, coll) -- a touching b
