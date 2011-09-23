@@ -21,12 +21,18 @@ function love.load()
   --initial graphics setup
   -- love.graphics.setBackgroundColor(57, 57, 59) -- substantial gray
   love.graphics.setBackgroundColor(255, 255, 255)
-  love.graphics.setMode(screen_width, screen_height, false, true, 0)
+  love.graphics.setMode(screen_width, screen_height, true, true, 4)
 end
 
 function love.update(dt)
   move_balls(dt)
   world:update(dt)
+
+  if love.keyboard.isDown(" ") and #objects.balls < 4000 then
+    table.times(4, function(x)
+                     table.push(objects.balls, spawn_ball({x=math.random(1,screen_width), y=math.random(1,screen_height)}))
+                   end)
+  end
 end
 
 function love.draw()
@@ -58,7 +64,6 @@ function get_targets()
                              local target = {}
                              target.x = (i % layer.width) * map.tilewidth
                              target.y = (math.floor(i / layer.width)) * map.tileheight
-                             print("x=" .. target.x .. " y=" .. target.y)
                              table.push(targets, target)
                            end
                          end)
@@ -115,8 +120,9 @@ function spawn_ball(target)
   ball.body = love.physics.newBody(world, math.random(1,screen_width), math.random(1,screen_height), 5, 0)
   ball.body:setLinearDamping( 0.5 )
   ball.shape = love.physics.newCircleShape(ball.body, 0, 0, 4)
+  ball.shape:setRestitution(0.5)
   ball.target = target
-  ball.speed = math.clamp(50, math.dist(ball.body:getX(), ball.body:getY(), target.x, target.y) / 2, 500)
+  ball.speed = math.clamp(50, math.dist(ball.body:getX(), ball.body:getY(), target.x, target.y) / 2, 300)
   ball.passive_dt = 0
   return ball
 end
