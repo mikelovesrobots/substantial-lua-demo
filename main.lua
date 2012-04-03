@@ -17,7 +17,7 @@ function love.load()
   --initial graphics setup
   -- love.graphics.setBackgroundColor(57, 57, 59) -- substantial gray
   love.graphics.setBackgroundColor(255, 255, 255)
-  love.graphics.setMode(screen_width, screen_height, true, true, 4)
+  love.graphics.setMode(screen_width, screen_height, false, true, 4)
 
   objects = {} -- table to hold all our physical objects
   objects.balls = table.collect(get_targets(), function(x) return spawn_ball(x) end)

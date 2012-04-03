@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <map version="1.0" orientation="orthogonal" width="121" height="75" tilewidth="8" tileheight="8">
  <tileset firstgid="1" name="substantial-tileset" tilewidth="8" tileheight="8">
-  <image source="../../Desktop/substantial-tileset.png" width="16" height="8"/>
+  <image source="substantial-tileset.png" width="16" height="8"/>
  </tileset>
  <layer name="Tile Layer 1" width="121" height="75">
   <data encoding="base64" compression="gzip">
-   H4sIAAAAAAAAA+3XywqAIBAFUO3/P7pVmwJzfGVwFocCp1FEuZRTShkAAAAAAAAAAAAAAAAAAACA3ztenvf3Uo+afpHa0f1W1vZ8B1E156flHo+oja5l1jpbx2bvBVxW53F07tJc0X5f3WN5zFdm5Upv/stjeNrhX3J0HteM73qPW/YEAAAAAAAAAAAAAAAAAAAiTgYTSdrMjQAA
+   H4sIAAAAAAAAA+3X2wqAIAwAUO3/P7rXCBIb3tDzcDCY2BzKKqeUMgAAAAAAAAAAAAAAAAAAwIercnw/l9aKrrvz3Na1hqc/5yVyj1vMjebUK99obFRNOM+sfhzNofTOUXuLxvRjZunVT1p9B+jHsNY/ZK9+XBNf9R5HagIAAAAAAAAAAAAAAAAAAADs4QZI+EERzI0AAA==
   </data>
  </layer>
 </map>
